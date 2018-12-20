@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="http://localhost:8083/nj_dom_ttma/bower_components/angular/angular.js"></script>
+    <style>
+        /* 设置验证不通过样式 */
+        input.ng-invalid { 
+            background-color: lightblue;
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div ng-app="myApp" ng-controller="myCtrl">
+
+        名: <input type="text" ng-model="firstName"><br>
+        姓: <input type="text" ng-model="lastName"><br>
+        <br>
+        姓名: {{firstName + " " + lastName}}
+
+        <ul>
+            <li ng-repeat="(item,i) in arr">{{item+i}}</li>
+        </ul>
+        <!-- 元素名 -->
+        <my-dir></my-dir>
+        <!-- 类名 -->
+        <div class="my-dir"></div>
+        
+        <!-- 属性 -->
+        <div my-dir></div>
+        <!-- 注释 -->
+        <!-- my-dir -->
+        <!-- ng-model指令用于验证 -->
+        <form name="myForm">
+            <input type="email" name="myAddress" ng-model="text">
+            <span ng-show="myForm.myAddress.$error.email">不是合法邮箱地址</span>
+        </form>
+
+        <!-- 事件处理 -->
+        <button ng-click="show()">click</button>
+
+        <!-- 过滤器 -->
+        <p>{{firstName | uppercase}}</p>
+        <p>{{firstName | lowercase}}</p>
+        <p>{{2 | myFormat}}</p>
+
+        <li ng-repeat="x in names">
+            {{ x.Name + ', ' + x.Country }}
+        </li>
+        <div ng-view></div>
+
+    </div>
+
+</body>
+
+</html>
+<script src="http://apps.bdimg.com/libs/angular-route/1.3.13/angular-route.js"></script>
+<!-- <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular-animate.min.js"></script> -->
+<script>
+    // let app = angular.module("myApp", ['ngAnimate']);
+    let app = angular.module("myApp", ['ngRoute']);
+
+    // 定义路由规则
+    app.config(['$routeProvider', function ($routeProvider) {
+        $routeProvider
+            .when('/', {
+                template: 'home'
+            })
+            .when('/about', {
+                template: 'about'
+            })
+            .otherwise({
+                redirectTo: '/'
+            })
+    }])
+
+    // value对象，定义值，并向控制器传递值
+    app.value('defaultValue', 'chen')
+    // 定义常量
+    app.constant('HOST', "8880")
+
+    // controller
+    app.controller('myCtrl', function ($scope, $rootScope, $location, $http, check,
+        defaultValue, HOST) {
+        // 定义变量
+        $scope.firstName = 'Kim';
+        $scope.lastName = defaultValue;
+        $scope.arr = [1, 2, 3, 4, 5];
+
+        // 定义根作用域变量
+        $rootScope.root = 'root';
+
+        // 定义事件回调
+        $scope.show = function () {
+            // alert("haha")
+            // console.log($location.absUrl())
+            // $http.get('http://localhost:5566/api').then(function (res) {
+            //     console.log(res)
+            // })
+            console.log(HOST)
+            console.log(check.myCheck(1))
+        }
+
+        // $scope.$watch()
+        $scope.$watch('firstName', function (newVal, old) {
+            console.log(newVal)
+            console.log(old)
+        })
+
+        $http.get("./j.json")
+            .then(function (response) {
+                $scope.names = response.records;
+            });
+    })
+
+    // 自定义指令
+    app.directive("myDir", function () {
+        return {
+            restrict: 'EACM',
+            template: '<h1>测试</h1>'
+        }
+    })
+
+    // 自定义过滤器
+    app.filter('myFormat', ['check', function (check) {
+        return function (x) {
+            return check.myCheck(x)
+        }
+    }])
+
+    // factory函数,工厂模式
+    app.factory('myFactory', function () {
+        let factory = {}
+        factory.sum = function (a, b) {
+            return a + b
+        }
+        return factory
+    })
+
+    // 自定义服务
+    app.service('check', function (myFactory, defaultValue) {
+        this.myCheck = function (x) {
+            console.log(defaultValue)
+            return x > 0
+        }
+        this.sum = function (a, b) {
+            return myFactory.sum(a, b)
+        }
+    })
+
+    //
+</script>
